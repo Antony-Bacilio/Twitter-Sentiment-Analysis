@@ -1,0 +1,3 @@
+
+ - https://medium.com/an-idea/real-time-twitter-map-with-javascript-python-and-kafka-a95d6bf34b92
+ - https://www.youtube.com/watch?v=a5MZN9u-8LA
