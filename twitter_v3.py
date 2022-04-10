@@ -1,8 +1,8 @@
 # Execution with TweePy version 3 (StreamListener), otherwise version 4 with Stream.
 
-# APPLICATION 1 : is mainly using Python Tweepy to listen to Twitter Streaming API.
-# Whenever a relevant Tweet is received it produces this Tweet as a message to a topic on Apache Kafka.
-# This was realized with the Pykafka library and editing the Tweepy standard StdOutListener class (see lines 15–27 below).
+# APPLICATION 1 : is mainly using Python Tweepy to listen to Twitter Streaming API. Whenever a relevant Tweet is
+# received it produces this Tweet as a message to a topic on Apache Kafka. This was realized with the Pykafka library
+# and editing the Tweepy standard StdOutListener class (see lines 15–27 below).
 
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler

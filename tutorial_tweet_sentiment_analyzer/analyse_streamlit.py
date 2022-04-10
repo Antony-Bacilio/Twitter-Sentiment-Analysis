@@ -21,7 +21,8 @@ class EncoderFunc(JSONEncoder):
     def default(self, obj):
         return obj.__dict__
 
-"""
+
+dict_ = """
 def get_messages_from_topic(topicname):
     client = get_kafka_client()
     consumer_2 = client.topics[topicname].get_simple_consumer()
@@ -39,7 +40,8 @@ def get_messages_from_topic(topicname):
 """
 
 # url_google = "http://maps.googleapis.com/maps/api/geocode/json?address=googleplex&sensor=false"
-url_localhost_flask = "http://127.0.0.1:5002/api/tweets/twitterdata1"  # http://127.0.0.1:5002/ is from the flask api
+url_localhost_flask = "http://127.0.0.1:5001/topic/twitterdata1"
+# url_localhost_flask = "http://127.0.0.1:5002/api/tweets/twitterdata1"  # http://127.0.0.1:5002/ is from the flask api
 response = requests.get(url_localhost_flask, stream=True)
 response.raise_for_status()
 # print(response)  # <Response [200]>
@@ -56,16 +58,16 @@ for tweet in response.iter_lines(decode_unicode=True):
     # tweet1 = tweet.decode('utf-8')
     # print(tweet1)  # type Str.
 
-    p = re.compile('(?<!\\\\)\'')
+    # p = re.compile('(?<!\\\\)\'')
     # tweet1 = p.sub('\"', tweet)
 
     tweet1 = tweet.replace("\'", "\"")
-    print(tweet1)
+    print(tweet1)  # type Str.
 
     # tweet_dict = json.loads(tweet1)
     # print(tweet_dict)  # type Dict.
     # get_messages_from_topic("twitterdata1")
-    push = requests.post(URL_API_POWERBI, tweet1.encode('utf-8'))
+    push = requests.post(URL_API_POWERBI, tweet1.encode('utf-8'))  # stream=True
     time.sleep(1)
 
     # data_table1 = pd.DataFrame(tweet)

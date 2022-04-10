@@ -1,39 +1,39 @@
-# Available with tweepy v3.10.
-
 import tweepy
-from tweepy.streaming import StreamListener
-from tweepy import OAuthHandler, Stream
-# Kafka client for Python.
-from pykafka import KafkaClient
 import credentials
+import pandas as pd
+import requests
+import time
+
+REST_API_URL = 'https://api.powerbi.com/beta/bc3dae5f-0b33-403d-b719-946457461af5/datasets/42a914fc-2b2e-4775' \
+                   '-9c36-88df2549fcde/rows?key=f7yAOnoLZCrWdlMqaAbf%2BWgGaM%2FHbQU' \
+                   '%2Bjz67qqJuwlrujnFYpbm6r4cDU6O0L32N3aGpqbOwPOABaF0uGfU%2FBw%3D%3D '
 
 
-def get_kafka_client():
-    return KafkaClient(hosts='127.0.0.1:9092')
+while True:
+    client = tweepy.Client(bearer_token=credentials.BEARER_TOKEN)
+    query = 'covid -is:retweet'
+    response = client.search_recent_tweets(query=query, max_results=10,
+                                           tweet_fields=['created_at', 'lang'], user_fields=['profile_image_url'],
+                                           expansions=['author_id'])
+    print("'Response':\n", response)  # type : <class 'tweepy.client.Response'>
 
+    users = {u['id']: u for u in response.includes['users']}
+    print("Response.includes['users']:\n", users)  # type Dict.
 
-# Classe Listener.
-class StdOutListener(StreamListener):
+    data_raw = []
+    print("'Response.data':\n", response.data)  # type List[<Tweet id=..., text=...>, <Tweet id=...>].
 
-    def on_data(self, data):
-        print(data)
-        client = get_kafka_client()
-        topic = client.topics['twitterdata1']  # List of topics.
-        # Create a producer for this topic in order to produce messages.
-        producer = topic.get_sync_producer()
-        producer.produce(data.encode('ascii'))
-        return True
+    tweet_list = [i.text for i in response.data]
+    id_list = [i.id for i in response.data]
+    df = pd.DataFrame(list(zip(id_list, tweet_list)),
+                      columns=['identifiant', 'message'])
+    # print(df)
+    # data_bytes = bytes(df.to_json(orient='records'), encoding='utf-8')  # type Binary.
+    data_bytes = df.to_json(orient='records', force_ascii=True)
+    print("JSON dataset: ", data_bytes)  # type Str.
 
-    def on_error(self, status):
-        print(status)
+    # Post the data on the Power BI API
+    req = requests.post(REST_API_URL, data_bytes)
 
-
-if __name__ == "__main__":
-    auth = OAuthHandler(credentials.API_KEY, credentials.API_SECRET_KEY)
-    auth.set_access_token(credentials.ACCESS_TOKEN, credentials.ACCESS_TOKEN_SECRET)
-
-    listener = StdOutListener()
-    Stream = Stream(auth, listener)
-    # follow : User ID of twitter account.
-    # track : key words for 'filter' tweets (like '#' hashtags for example)
-    Stream.filter(follow=["244632800"], track=['#Brexit', '#COVID'])
+    print("Data posted in Power BI API")
+    time.sleep(2)

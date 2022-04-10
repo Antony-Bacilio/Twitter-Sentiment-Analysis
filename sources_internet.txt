@@ -1,0 +1,7 @@
+- https://github.com/kaantas/spark-twitter-sentiment-analysis
+
+- NLP : https://larevueia.fr/nlp-avec-python-analyse-de-sentiments-sur-twitter/
+
+- https://elkhayati.me/kafka-python-twitter/
+
+- https://sites.google.com/a/ku.th/big-data/pyspart

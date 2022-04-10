@@ -39,7 +39,9 @@ def run():
                                lang="en").items(number_of_tweets)
             print(tweets)
             tweet_list = [i.text for i in tweets]  # Text of each tweet.
+            print("tweet_list:\n", tweet_list)
             p = [i for i in classifier(tweet_list)]
+            print("p:\n", p)
             q = [p[i]['label'] for i in range(len(p))]
             c0 = 'Latest ' + str(number_of_tweets) + ' Tweets' + ' on ' + search_words
             c1 = 'Sentiment'

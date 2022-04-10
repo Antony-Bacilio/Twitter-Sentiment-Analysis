@@ -7,7 +7,7 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
     id: 'mapbox/streets-v11',
     tileSize: 512,
     zoomOffset: -1,
-    accessToken: 'pk.eyJ1IjoiYW50b255YmFjaWxpbyIsImEiOiJjbDBqcjVibnIwZDlvM2pxdHA3N2k2cnlqIn0.AA7kaOI-tfUnjzE7fnVT6w'
+    accessToken: 'pk.eyJ1IjoiYW50b255YmFjaWxpbyIsImEiOiJjbDFzNWFqdGIwYm84M2RwbHY0d3BpaTJ3In0.U00u45zTkiQMdsF39bcxwQ'
 }).addTo(mymap);
 
 // From within the frontend we are calling the first route with HTML5 Server-Sent Events and
@@ -16,12 +16,17 @@ var source = new EventSource('/topic/twitterdata1');
 
 source.addEventListener('message', function(e){
     obj = JSON.parse(e.data);
+    console.log("antony")
     console.log(obj);
+
     lat = obj.place.bounding_box.coordinates[0][0][1];
     long = obj.place.bounding_box.coordinates[0][0][0];
+
     username = obj.user.name;
     tweet = obj.text;
+    city = obj.place.name;
+    country = obj.place.country;
 
-    marker = L.marker([lat,long],).addTo(mymap).bindPopup('Username: <strong>' + username + '</strong><br>Tweet: <strong>' + tweet + '</strong>');
+    marker = L.marker([lat,long],).addTo(mymap).bindPopup('Username: <strong>' + username + '</strong><br>Tweet: <strong>' + tweet + '</strong><br><br>City: ' + city + '<br>Country: <strong>' + country + '</strong>');
 
 }, false);

@@ -16,21 +16,26 @@ def get_kafka_client():
 
 
 # Classe Listener.
-class StdOutListener(stm):
+class TwitterListener(stm):
     def on_data(self, data):
         # print(data)  # It's in Binary/bytes.
-        message = json.loads(data)
-        if message['place'] is not None:
-            print(message)  # with one quote - type Dict.
+        tweet = json.loads(data)  # Transform to Dict (JSON)
+        print(tweet)  # with one quote - type Dict.
+
+        # Calculate only tweets having a 'place'.
+        if tweet['place'] is not None:
             client = get_kafka_client()
             topic = client.topics['twitterdata1']  # List of Topics and take one (twitterdata1).
             # Create a Producer for Topic (twitterdata1) in order to produce Events (records/messages)
             producer_1 = topic.get_sync_producer()
 
+            # Preparing a data structure to push into the topic.
+            data_to_topic = {'screen_name': tweet['user']['screen_name'],
+                             'text': tweet['text']}
+
             # Decode UTF-8 bytes to Unicode (with double quotes)
             # json_string = data.decode('utf8')
-            # print(json_string)
-            # print(type(json_string))  # type Str.
+            # print(json_string) # type Str.
 
             # Load the JSON to a Python list & dump it back out as formatted JSON
             # json_dict = json.loads(json_string)
@@ -40,6 +45,10 @@ class StdOutListener(stm):
             # s = json.dumps(json_dict, indent=4, sort_keys=True)
             # print(s)  # Custom display (well separated with line breaks)
             # print(type(s))  # type Str.
+
+            tweet_str = json.dumps(data_to_topic)
+            tweet_byte = bytes(tweet_str, encoding='utf-8')
+            print(tweet_byte)  # type Binary.
 
             # 'data' in binary
             producer_1.produce(data)  # V3 : producer_1.produce(bytes(data, encoding='utf-8'))
@@ -57,13 +66,11 @@ if __name__ == "__main__":
     """
     auth = OAuthHandler(credentials.API_KEY, credentials.API_SECRET_KEY)
     auth.set_access_token(credentials.ACCESS_TOKEN, credentials.ACCESS_TOKEN_SECRET)
-    listener = StdOutListener(credentials.API_KEY, credentials.API_SECRET_KEY, credentials.ACCESS_TOKEN,
-                              credentials.ACCESS_TOKEN_SECRET)
+    twitter_stream = TwitterListener(credentials.API_KEY, credentials.API_SECRET_KEY, credentials.ACCESS_TOKEN,
+                               credentials.ACCESS_TOKEN_SECRET)
     # stream = Stream(auth, listener)
 
     # FILTERS
-    # stream.filter(track=['codeanddogs'])
     # stream.filter(track=['#Brexit', '#COVID'])  # track: key words for 'filter' tweets (like '#' hashtags for example)
-    # stream.filter(track=['#COVID', '#covid','#india'])
     # stream.filter(follow=["244632800"])
-    listener.filter(locations=[-180, -90, 180, 90])
+    twitter_stream.filter(locations=[-180, -90, 180, 90], languages=["en", "fr", "es"], track=['COVID', 'covid', 'CORONA', 'CORONAVIRUS'])
