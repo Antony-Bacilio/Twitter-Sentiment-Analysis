@@ -9,6 +9,7 @@ from tweepy import OAuthHandler
 import credentials
 from pykafka import KafkaClient
 import json
+from dateutil.parser import parse
 
 
 def get_kafka_client():
@@ -48,9 +49,10 @@ class TwitterListener(stm):
 
             tweet_str = json.dumps(data_to_topic)
             tweet_byte = bytes(tweet_str, encoding='utf-8')
-            print(tweet_byte)  # type Binary.
+            # print(tweet_byte)  # type Binary.
 
             # 'data' in binary
+            print("Data pushed into Topic Kafka:\n", data)
             producer_1.produce(data)  # V3 : producer_1.produce(bytes(data, encoding='utf-8'))
             # To read these Events, go to a terminal and
         return True
@@ -73,4 +75,4 @@ if __name__ == "__main__":
     # FILTERS
     # stream.filter(track=['#Brexit', '#COVID'])  # track: key words for 'filter' tweets (like '#' hashtags for example)
     # stream.filter(follow=["244632800"])
-    twitter_stream.filter(locations=[-180, -90, 180, 90], languages=["en", "fr", "es"], track=['COVID', 'covid', 'CORONA', 'CORONAVIRUS'])
+    twitter_stream.filter(locations=[-180, -90, 180, 90], languages=["en"], track=['COVID', 'covid', 'CORONA', 'CORONAVIRUS'])

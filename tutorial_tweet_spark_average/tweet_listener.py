@@ -17,7 +17,7 @@ class TweetListener(Stream):
     def __init__(self, consumer_key, consumer_secret, access_token, access_token_secret, **kwargs):
         super().__init__(consumer_key, consumer_secret, access_token, access_token_secret, **kwargs)
         self.client = get_kafka_client()
-        self.producer = self.client.topics[bytes('twitter', 'ascii')].get_producer()
+        self.producer = self.client.topics[bytes('twitter_topic', 'ascii')].get_producer()
 
     def on_data(self, data):
         try:
@@ -41,11 +41,11 @@ class TweetListener(Stream):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: PYSPARK_PYTHON=python3 /bin/spark-submit ex.py <YOUR WORD>", file=sys.stderr)
-        exit(-1)
+    # if len(sys.argv) != 2:
+    #    print("Usage: PYSPARK_PYTHON=python3 /bin/spark-submit ex.py <YOUR WORD>", file=sys.stderr)
+    #    exit(-1)
 
-    word = sys.argv[1]
+    word = "covid"  # sys.argv[1]
 
     auth = OAuthHandler(credentials.API_KEY, credentials.API_SECRET_KEY)
     auth.set_access_token(credentials.ACCESS_TOKEN, credentials.ACCESS_TOKEN_SECRET)

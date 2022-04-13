@@ -23,23 +23,30 @@ if __name__ == "__main__":
         StructField("senti_val", DoubleType(), True)
     ])
 
+    # TODO : Keep looking to https://stackoverflow.com/questions/70374571/connecting-pyspark-with-kafka
+    # creating an instance of SparkSession.
     spark = SparkSession.builder.appName("TwitterSentimentAnalysis").getOrCreate()
+    print("salut1")
 
+    # Subscribe to 1 topic
     kafka_df = spark.readStream.format("kafka").option("kafka.bootstrap.servers", "localhost:9092").option("subscribe",
-                                                                                                           "twitter").load()
+                                                                                                           "twitter_topic").load()
+    print(kafka_df)
 
     kafka_df_string = kafka_df.selectExpr("CAST(value AS STRING)")
+    # df.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+    print(kafka_df_string)
 
-    tweets_table = kafka_df_string.select(from_json(col("value"), schema).alias("data")).select("data.*")
+    # tweets_table = kafka_df_string.select(from_json(col("value"), schema).alias("data")).select("data.*")
 
-    sum_val_table = tweets_table.select(avg('senti_val').alias('avg_senti_val'))
+    # sum_val_table = tweets_table.select(avg('senti_val').alias('avg_senti_val'))
 
     # udf = USER DEFINED FUNCTION
-    udf_avg_to_status = udf(fun, StringType())
+    # udf_avg_to_status = udf(fun, StringType())
 
-    # avarage of senti_val column to status column
-    new_df = sum_val_table.withColumn("status", udf_avg_to_status("avg_senti_val"))
+    # average of senti_val column to status column
+    # new_df = sum_val_table.withColumn("status", udf_avg_to_status("avg_senti_val"))
 
-    query = new_df.writeStream.outputMode("complete").format("console").start()
+    # query = new_df.writeStream.outputMode("complete").format("console").start()  # .format("parquet").start()
 
-    query.awaitTermination()
+    # query.awaitTermination()
