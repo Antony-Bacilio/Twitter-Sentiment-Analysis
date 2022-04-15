@@ -75,4 +75,4 @@ if __name__ == "__main__":
     # FILTERS
     # stream.filter(track=['#Brexit', '#COVID'])  # track: key words for 'filter' tweets (like '#' hashtags for example)
     # stream.filter(follow=["244632800"])
-    twitter_stream.filter(locations=[-180, -90, 180, 90], languages=["en"], track=['COVID', 'covid', 'CORONA', 'CORONAVIRUS'])
+    twitter_stream.filter(locations=[-180, -90, 180, 90], languages=["en", "fr"], track=["#COVID", "covid", "CORONA", "#CORONAVIRUS"])

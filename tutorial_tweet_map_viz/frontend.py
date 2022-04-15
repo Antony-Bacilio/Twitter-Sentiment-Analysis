@@ -16,8 +16,6 @@ from dateutil.parser import parse
 
 app = Flask(__name__)
 
-URL_API_POWERBI = "https://api.powerbi.com/beta/bc3dae5f-0b33-403d-b719-946457461af5/datasets/f05333e4-bf4c-4807-9d39" \
-                  "-d5e789e8d2ed/rows?key=zjszKG0LBatEnBFHALeQDY9vYx2JNNWraTT3WYi7bxXCNlP48d9ZQOuZ0syKO6R7yEFGOoBzgN67Za8y8UqMtQ%3D%3D "
 URL_API_POWERBI_TWEET = "https://api.powerbi.com/beta/bc3dae5f-0b33-403d-b719-946457461af5/datasets/5dbe2194-ef79" \
                         "-40b9-a2a9-2d2288d987a5/rows?key=Eur7Z71GOtJI%2F%2BiCH3Cc%2FwH" \
                         "%2FaSBKfd4vl5d7a4jWN0BYrTKcqqHWU1V1NV7RcQITskX2DBIw4l4w%2FAAoRFN5Ww%3D%3D "
@@ -66,53 +64,90 @@ def publish_tweets(topicname):
             tweet_str = tweet.value.decode()  # tweet.decode('utf8')
             # print(data_str)  # type Str.
 
-            # Post tweets to PowerBI in 'Str' format.
-            # Get the data pushed in JSON Dict format.
-            tweet_transformed_dict = post_to_powerbi(tweet_str)
-            print("tweet_transformed_dict:\n", tweet_transformed_dict)  # Type Dict.
-            # new_tweet_dict = dict((k, v) for (k, v) in tweet_dict.items() if k == 'created_at' or k == 'text' or k
-            # == 'lang')
+            # Transforming data String in a Dict format.
+            tweet_dict = json.loads(tweet_str)
 
-            yield f"{tweet_transformed_dict}\n\n"
+            # Get message of tweet properly cleaned.
+            print("message tweet (without cleaning):\n", tweet_dict['text'])
+            message_tweet = nlp_cleaning_pipeline(tweet_dict['text'])
+            print("message tweet cleaned:\n", message_tweet)
+
+            if tweet_dict['lang'] == 'en':
+                # Preparing a data structure (in English) to push into PowerBI.
+                tweet_filtered_en = {"datetime": parse(tweet_dict['created_at']),  # parse(tweet_dict['created_at'])
+                                     "user": tweet_dict['user']['name'],
+                                     "message": message_tweet,
+                                     "message_size": len(message_tweet),
+                                     "followers": tweet_dict['user']['followers_count'],
+                                     "latitude": tweet_dict['place']['bounding_box']['coordinates'][0][0][1],
+                                     "longitude": tweet_dict['place']['bounding_box']['coordinates'][0][0][0],
+                                     "city": tweet_dict['place']['name'],
+                                     "country": tweet_dict['place']['country']
+                                     }
+
+                # Sentiment response from a message (tweet).
+                # sentiment_status = sentiment_analysis(message_tweet)
+                # print("sentiment: ", sentiment_status)
+
+                # tweet_sentiment = tweet_filtered_en
+                # tweet_sentiment['sentiment'] = sentiment_status,
+
+                # print("tweet_sentiment:\n", tweet_sentiment)  # type Dict.
+                # tweet_sentiment_str = json.dumps(tweet_sentiment,
+                #                                default=str)  # https://stackoverflow.com/questions/11875770/how-to-overcome-datetime-datetime-not-json-serializable
+
+                # print("tweet_sentiment_str:\n", tweet_sentiment_str)
+
+                # Post tweets to PowerBI in 'Str' format.
+                # post_to_powerbi(tweet_sentiment_str)
+
+                print("tweet_filtered:\n", tweet_filtered_en)
+                continue
+
+            else:
+                # Preparing a data structure (in French) to push into PowerBI.
+                tweet_filtered_fr = {"datetime": parse(tweet_dict['created_at']),  # parse(tweet_dict['created_at'])
+                                     "user": tweet_dict['user']['name'],
+                                     "message": message_tweet,
+                                     "message_size": len(message_tweet),
+                                     "followers": tweet_dict['user']['followers_count'],
+                                     "latitude": tweet_dict['place']['bounding_box']['coordinates'][0][0][1],
+                                     "longitude": tweet_dict['place']['bounding_box']['coordinates'][0][0][0],
+                                     "city": tweet_dict['place']['name'],
+                                     "country": tweet_dict['place']['country']
+                                     }
+
+                # Sentiment response from a message (tweet).
+                # sentiment_status = sentiment_analysis(message_tweet)
+                # print("sentiment: ", sentiment_status)
+
+                # tweet_sentiment = tweet_filtered
+                # tweet_sentiment['sentiment'] = sentiment_status,
+
+                # print("tweet_sentiment:\n", tweet_sentiment)  # type Dict.
+                # tweet_sentiment_str = json.dumps(tweet_sentiment,
+                #                                default=str)  # https://stackoverflow.com/questions/11875770/how-to-overcome-datetime-datetime-not-json-serializable
+
+                # print("tweet_sentiment_str:\n", tweet_sentiment_str)
+
+                # Post tweets to PowerBI in 'Str' format.
+                # post_to_powerbi(tweet_sentiment_str)
+
+                print("tweet_filtered:\n", tweet_filtered_fr)
+                tweet_filtered_str = json.dumps(tweet_filtered_fr, default=str)
+                yield f"{tweet_filtered_str}\n\n"
 
     return Response(event(), mimetype="text/event-stream")
 
 
 # Pushing tweets transformed on PowerBI Service.
 def post_to_powerbi(data: str):
-    # Transforming data String in a Dict format.
-    tweet_dict = json.loads(data)
-
-    # Get message of tweet properly cleaned.
-    print("message tweet (without cleaning):\n", tweet_dict['text'])
-    message_tweet = nlp_cleaning_pipeline(tweet_dict['text'])
-
-    # Sentiment response from a message (tweet).
-    sentiment_status = sentiment_analysis(message_tweet)
-    print("message tweet cleaned:\n", message_tweet)
-    print("sentiment: ", sentiment_status)
-
-    # Preparing a data structure to push into PowerBI.
-    # TODO: Add a column about 'number of characters' of tweets messages for example.
-    tweet_filtered = {'datetime': parse(tweet_dict['created_at']),
-                      'user': tweet_dict['user']['name'],
-                      'message': message_tweet,
-                      'message_size': len(message_tweet),
-                      'sentiment': sentiment_status,
-                      'followers': tweet_dict['user']['followers_count'],
-                      'latitude': tweet_dict['place']['bounding_box']['coordinates'][0][0][1],
-                      'longitude': tweet_dict['place']['bounding_box']['coordinates'][0][0][0],
-                      'city': tweet_dict['place']['name'],
-                      'country': tweet_dict['place']['country']
-                      }
-    print("tweet_filtered:\n", tweet_filtered)  # type Dict.
-    tweet_filtered_str = json.dumps(tweet_filtered, default=str)  # https://stackoverflow.com/questions/11875770/how-to-overcome-datetime-datetime-not-json-serializable
-    push = requests.post(URL_API_POWERBI_TWEET, "[" + tweet_filtered_str + "]")  # stream=True
-    print("tweet_filtered_str:\n", tweet_filtered_str)
+    push = requests.post(URL_API_POWERBI_TWEET, "[" + data + "]", stream=True)  # stream=True
     print("\tData transformed pushed to PowerBI...")
-    return tweet_filtered
+    # return tweet_filtered
 
 
+"""
 # Sentiment analysis of twets (message)
 def sentiment_analysis(message: str):
     # Definition of an instance of sentiment analysis
@@ -124,10 +159,12 @@ def sentiment_analysis(message: str):
     print("sentiment_list:\n", sentiment_list)  # type List.
     sentiment_status = sentiment_list[0]['label']
     return sentiment_status
+"""
 
 
 # Cleaning of tweets (message).
 def nlp_cleaning_pipeline(text):
+    text = remove_url(text)
     text = text.lower()
     text = text.replace('\n', ' ').replace('\r', '')
     text = ' '.join(text.split())
@@ -146,6 +183,23 @@ def nlp_cleaning_pipeline(text):
     text = re.sub(r"\-", "", text)
 
     return text
+
+
+# Cleaning message of tweets (remove URL link).
+def remove_url(text: str):
+    """Remplace les url trouvée par le caractère vide " "
+
+    Parametre
+    ----------
+    txt : string
+        la variable string que l'on soutaite remplacé
+
+    Sortie
+    -------
+    Le fichier nettoyé des url
+
+    """
+    return " ".join(re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", text).split())
 
 
 if __name__ == "__main__":
