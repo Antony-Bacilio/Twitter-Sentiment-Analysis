@@ -1,4 +1,4 @@
-# Execution with TweePy version 3 (StreamListener), otherwise version 4 with Stream.
+# Execution with TweePy version 4 (Stream).
 
 # APPLICATION 1 : is mainly using Python Tweepy to listen to Twitter Streaming API. Whenever a relevant Tweet is
 # received it produces this Tweet as a message to a topic on Apache Kafka. This was realized with the Pykafka library
@@ -9,7 +9,6 @@ from tweepy import OAuthHandler
 import credentials
 from pykafka import KafkaClient
 import json
-from dateutil.parser import parse
 
 
 def get_kafka_client():
@@ -31,8 +30,7 @@ class TwitterListener(stm):
             producer_1 = topic.get_sync_producer()
 
             # Preparing a data structure to push into the topic.
-            data_to_topic = {'screen_name': tweet['user']['screen_name'],
-                             'text': tweet['text']}
+            # data_to_topic = {'screen_name': tweet['user']['screen_name'], 'text': tweet['text']}
 
             # Decode UTF-8 bytes to Unicode (with double quotes)
             # json_string = data.decode('utf8')
@@ -47,8 +45,8 @@ class TwitterListener(stm):
             # print(s)  # Custom display (well separated with line breaks)
             # print(type(s))  # type Str.
 
-            tweet_str = json.dumps(data_to_topic)
-            tweet_byte = bytes(tweet_str, encoding='utf-8')
+            # tweet_str = json.dumps(data_to_topic)
+            # tweet_byte = bytes(tweet_str, encoding='utf-8')
             # print(tweet_byte)  # type Binary.
 
             # 'data' in binary
@@ -71,8 +69,9 @@ if __name__ == "__main__":
     twitter_stream = TwitterListener(credentials.API_KEY, credentials.API_SECRET_KEY, credentials.ACCESS_TOKEN,
                                credentials.ACCESS_TOKEN_SECRET)
     # stream = Stream(auth, listener)
+    word = "covid"
 
     # FILTERS
     # stream.filter(track=['#Brexit', '#COVID'])  # track: key words for 'filter' tweets (like '#' hashtags for example)
     # stream.filter(follow=["244632800"])
-    twitter_stream.filter(locations=[-180, -90, 180, 90], languages=["en", "fr"], track=["#COVID", "covid", "CORONA", "#CORONAVIRUS"])
+    twitter_stream.filter(locations=[-180, -90, 180, 90], languages=["en", "fr"], track=[word])
