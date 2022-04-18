@@ -1,4 +1,0 @@
-
-- Real time streaming in Power BI : https://www.youtube.com/watch?v=cOSKEWnlNkI
-
-- Power BI live streaming simulation via python script 2021 : https://www.youtube.com/watch?v=O-QvV7ndDi8
