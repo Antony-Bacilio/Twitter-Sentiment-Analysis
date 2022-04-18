@@ -1,8 +1,0 @@
-
-- https://www.analyticsvidhya.com/blog/2021/10/build-a-live-twitter-sentiment-analyzer-with-tweepy-huggingface-transformers-and-streamlit/
-
-- https://www.analyticsvidhya.com/blog/2022/02/interactive-tweet-sentiment-visualization/
-
-- https://www.analyticsvidhya.com/blog/2020/12/streamlit-web-api-for-nlp-tweet-sentiment-analysis/
-
-- https://www.analyticsvidhya.com/blog/2020/12/deploying-machine-learning-models-using-streamlit-an-introductory-guide-to-model-deployment/
